@@ -1,50 +1,68 @@
 const body = document.querySelector('body');
 
-function game(parent) {
+const wrapper = document.createElement('div');
+wrapper.classList.add('wrapper');
+body.append(wrapper);
 
-  parent.innerHTML = '';
+let xArr = [];
+let oArr = [];
+let cellsCounter = 0;
 
-  const xArr = [];
-  const oArr = [];
+function game(wrapper) {
 
-  const wrapper = document.createElement('div');
-  wrapper.classList.add('wrapper');
-  body.append(wrapper);
+  xArr = [];
+  oArr = [];
+  cellsCounter = 0;
 
-  for (let i = 0; i < 9; i++) {
-    const element = document.createElement('div');
-    element.classList.add('element');
-    element.setAttribute('id', i);
-    wrapper.append(element);
-  }
+  if (!wrapper.children.length) {
 
-  wrapper.addEventListener('click', (e) => {
-
-    if (e.target === wrapper) {
-      return;
+    for (let i = 0; i < 9; i++) {
+      const element = document.createElement('div');
+      element.classList.add('element');
+      element.setAttribute('id', i);
+      wrapper.append(element);
     }
 
-    if (!xArr.includes(e.target.id) && !oArr.includes(e.target.id)) {
-
-      if (xArr.length === oArr.length) {
-        xArr.push(e.target.id);
-        e.target.classList.add('red');
-
-        if (isWin(xArr)) {
-          winNotification(wrapper, 'Red');
-        }
-
-      } else {
-        oArr.push(e.target.id);
-        e.target.classList.add('yellow');
-
-        if (isWin(oArr)) {
-          winNotification(wrapper, 'Yellow');
-        }
-
+    wrapper.addEventListener('click', (e) => {
+      
+      if (!e.target.classList.contains('element')) {
+        return;
       }
+
+      cellsCounter++;
+
+      if (!xArr.includes(e.target.id) && !oArr.includes(e.target.id)) {
+  
+        if (xArr.length === oArr.length) {
+          xArr.push(e.target.id);
+          e.target.classList.add('red');
+  
+          if (xArr.length > 2) {
+            if (isWin(xArr)) {
+              winNotification(wrapper, 'Red wins!');
+            }
+          }
+          
+        } else {
+          oArr.push(e.target.id);
+          e.target.classList.add('yellow');
+          
+          if (oArr.length > 2) {
+            if (isWin(oArr)) {
+              winNotification(wrapper, 'Yellow wins!');
+            }
+          }
+        }
+      }
+      if (cellsCounter === 9 && !isWin(xArr) && !isWin(oArr)) {
+        winNotification(wrapper, 'Draw!');
+      } 
+    });
+  } else {
+    for (let child of wrapper.children) {
+      child.classList.remove('red', 'yellow');
     }
-  });
+  }
 }
 
 function isWin(arr) {
@@ -63,21 +81,22 @@ function isWin(arr) {
   }
 }
 
-function winNotification(parent, winner) {
+function winNotification(parent, message) {
   const notification = document.createElement('div');
   notification.classList.add('notification');
-  notification.innerText = `${winner} wins!`;
+  notification.innerText = `${message}`;
 
   const btnRestart = document.createElement('button');
   btnRestart.classList.add('btn-restart');
   btnRestart.innerText = 'Restart';
 
-  btnRestart.addEventListener('click', () => {
-    game(body);
+  btnRestart.addEventListener('click', (e) => {
+    notification.parentNode.removeChild(notification);
+    game(wrapper);
   });
 
   notification.append(btnRestart)
   parent.append(notification);
 }
 
-game(body);
+game(wrapper);
